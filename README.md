@@ -73,3 +73,7 @@ services:
   postgres:     # PostgreSQL 16 — port 5432
   redis:        # Optional — for rate limiting / caching — port 6379
 ```
+
+![Project Flow](/images/project-flow.png)
+![Graph State](/images/graph-state.png)
+![database-schema](/images/database-schema.png)
