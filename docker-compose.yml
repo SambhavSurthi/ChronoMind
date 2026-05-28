@@ -1,0 +1,51 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: chronomind
+      POSTGRES_PASSWORD: chronomind
+      POSTGRES_DB: chronomind
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chronomind"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    env_file: ./backend/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  mcp_server:
+    build: ./mcp_server
+    ports:
+      - "8001:8001"
+    env_file: ./mcp_server/.env
+    environment:
+      - FASTMCP_PORT=8001
+      - FASTMCP_HOST=0.0.0.0
+    volumes:
+      - ./mcp_server:/app
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    env_file: ./frontend/.env
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
